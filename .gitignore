@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+.astro/
+.wrangler/
+.output/
+.vercel/
+.open-next/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+apps/mcp-server/.dev.vars
+
+# Logs & debug
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS & editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Test & coverage
+coverage/
+.nyc_output/
+
+# Playwright / scraper artifacts
+packages/scripts/.playwright/
+packages/scripts/tmp/
+*.webm
+*.mp4
+
+# Payload / CMS
+apps/cms/media/
+
+# TypeScript
+*.tsbuildinfo
+
+# Cloudflare
+.dev.vars

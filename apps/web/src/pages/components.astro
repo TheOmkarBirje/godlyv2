@@ -1,0 +1,61 @@
+---
+import { VideoCard } from "../components/VideoCard";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getPublishedComponents } from "../lib/cms";
+import { videoObjectJsonLd } from "../lib/schema";
+
+const components = await getPublishedComponents();
+
+const jsonLd = components
+  .filter((component) => component.videoUrl && component.posterUrl)
+  .slice(0, 12)
+  .map((component) =>
+    videoObjectJsonLd({
+      name: component.title,
+      description: component.description,
+      contentUrl: component.videoUrl!,
+      thumbnailUrl: component.posterUrl!,
+    }),
+  );
+---
+
+<BaseLayout
+  title="Components — Godly.Design"
+  description="UI component registry with hover preview loops and MCP copy prompts."
+  jsonLd={jsonLd}
+>
+  <section class="space-y-6">
+    <div class="space-y-2">
+      <p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Registry</p>
+      <h1 class="text-3xl font-semibold tracking-tight text-white">UI components</h1>
+      <p class="max-w-2xl text-sm text-zinc-400">
+        Standalone coded components with creator attribution. Copy an opaque MCP
+        prompt — no registry URLs or source leaks on the public web.
+      </p>
+    </div>
+
+    <div class="columns-1 gap-4 sm:columns-2 lg:columns-3">
+      {components.map((component) => {
+        const library =
+          component.library && typeof component.library === "object"
+            ? component.library
+            : null;
+
+        return (
+          <div class="mb-4 break-inside-avoid">
+            <VideoCard
+              client:visible
+              title={component.title}
+              subtitle={component.category ?? undefined}
+              videoUrl={component.videoUrl}
+              posterUrl={component.posterUrl}
+              library={library}
+              showCopy
+              promptText={`Use @godly to build component #${component.customId}`}
+            />
+          </div>
+        );
+      })}
+    </div>
+  </section>
+</BaseLayout>

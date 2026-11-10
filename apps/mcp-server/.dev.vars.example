@@ -1,0 +1,5 @@
+INTERNAL_MCP_SECRET=local-test-mcp-secret
+PAYLOAD_CMS_URL=https://testcms.godly.design
+GODLY_CHECKOUT_URL=https://test.godly.design/pricing
+MCP_ALLOWED_ORIGINS=http://localhost:4321,https://test.godly.design
+GODLY_DEV_API_KEY=local-test-mcp-key

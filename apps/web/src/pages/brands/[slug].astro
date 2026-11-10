@@ -1,0 +1,153 @@
+---
+import { VideoCard } from "../../components/VideoCard";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  getCompanyBySlug,
+  getMarketingAssets,
+  getPages,
+  getSections,
+} from "../../lib/cms";
+import { videoObjectJsonLd } from "../../lib/schema";
+import type { PageDoc } from "../../types/content";
+
+const { slug } = Astro.params;
+if (!slug) {
+  Astro.response.status = 404;
+}
+
+const company = slug ? await getCompanyBySlug(slug) : null;
+if (!company) {
+  Astro.response.status = 404;
+}
+
+const pages = company ? await getPages(company.id) : [];
+const sections = company ? await getSections(company.id) : [];
+const marketing = company ? await getMarketingAssets(company.id) : [];
+
+const landing =
+  pages.find((page) => page.pageType === "Landing") ?? pages[0] ?? null;
+
+const activeTab = Astro.url.searchParams.get("page") ?? landing?.slug ?? "";
+const selectedPage: PageDoc | null =
+  pages.find((page) => page.slug === activeTab) ?? landing;
+
+const jsonLd =
+  company && selectedPage?.fullPageVideoUrl
+    ? videoObjectJsonLd({
+        name: `${company.name} — ${selectedPage.title}`,
+        description: company.description ?? undefined,
+        contentUrl: selectedPage.fullPageVideoUrl,
+        thumbnailUrl:
+          selectedPage.fullPagePosterUrl ??
+          company.logoUrl ??
+          selectedPage.fullPageVideoUrl,
+      })
+    : undefined;
+---
+
+<BaseLayout
+  title={company ? `${company.name} — Brand Hub` : "Brand not found"}
+  description={
+    company?.description ??
+    "This brand hub could not be found on Godly.Design."
+  }
+  jsonLd={jsonLd}
+>
+  {!company ? (
+    <section class="rounded-2xl border border-dashed border-white/10 p-12 text-center">
+      <h1 class="text-xl font-medium text-white">Brand not found</h1>
+      <p class="mt-2 text-sm text-zinc-400">
+        No company matches <code class="text-zinc-300">{slug}</code>.
+      </p>
+      <a href="/" class="godly-pill mt-6 inline-flex">Back to feed</a>
+    </section>
+  ) : (
+  <section class="space-y-10">
+    <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div class="space-y-2">
+        <p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Company Hub</p>
+        <h1 class="text-3xl font-semibold tracking-tight text-white">{company.name}</h1>
+        {company.domain ? (
+          <p class="text-sm text-zinc-400">{company.domain}</p>
+        ) : null}
+      </div>
+      {company.logoUrl ? (
+        <img
+          src={company.logoUrl}
+          alt={`${company.name} logo`}
+          class="h-12 w-12 rounded-xl border border-white/10 object-cover"
+          loading="lazy"
+        />
+      ) : null}
+    </header>
+
+    {pages.length > 0 ? (
+      <div class="space-y-4">
+        <div class="flex flex-wrap gap-2">
+          {pages.map((page) => (
+            <a
+              href={`?page=${page.slug}`}
+              class:list={[
+                "godly-pill",
+                { "godly-pill-active": page.slug === (selectedPage?.slug ?? "") },
+              ]}
+            >
+              {page.title}
+            </a>
+          ))}
+        </div>
+
+        {selectedPage?.fullPageVideoUrl ? (
+          <div class="overflow-hidden rounded-3xl border border-white/10 bg-black">
+            <video
+              class="max-h-[70vh] w-full object-contain"
+              controls
+              playsinline
+              preload="metadata"
+              poster={selectedPage.fullPagePosterUrl}
+            >
+              <source src={selectedPage.fullPageVideoUrl} type="video/webm" />
+            </video>
+          </div>
+        ) : null}
+      </div>
+    ) : null}
+
+    <section class="space-y-4">
+      <h2 class="text-lg font-medium text-white">Sections</h2>
+      <div class="columns-1 gap-4 sm:columns-2 lg:columns-3">
+        {sections.map((section) => (
+          <div class="mb-4 break-inside-avoid">
+            <VideoCard
+              client:visible
+              title={section.title}
+              subtitle={section.sectionType ?? undefined}
+              videoUrl={section.videoUrl}
+              posterUrl={section.posterUrl}
+              promptText={`Use @godly to build #${section.customId}`}
+            />
+          </div>
+        ))}
+      </div>
+    </section>
+
+  {marketing.length > 0 ? (
+    <section class="space-y-4">
+      <h2 class="text-lg font-medium text-white">Marketing assets</h2>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {marketing.slice(0, 6).map((asset) => (
+          <VideoCard
+            client:visible
+            title={asset.title}
+            subtitle={asset.assetType ?? undefined}
+            imageUrl={asset.mediaUrl}
+            posterUrl={asset.thumbnailUrl ?? asset.mediaUrl}
+            href="/marketing"
+          />
+        ))}
+      </div>
+    </section>
+    ) : null}
+  </section>
+  )}
+</BaseLayout>

@@ -1,0 +1,52 @@
+---
+import { VideoCard } from "../components/VideoCard";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getMarketingAssets } from "../lib/cms";
+import { imageGalleryJsonLd } from "../lib/schema";
+
+const marketing = await getMarketingAssets();
+
+const jsonLd = imageGalleryJsonLd({
+  name: "Godly.Design Marketing Feed",
+  images: marketing
+    .map((asset) => ({
+      url: asset.mediaUrl ?? asset.thumbnailUrl ?? "",
+      name: asset.title,
+    }))
+    .filter((image) => image.url),
+});
+---
+
+<BaseLayout
+  title="Marketing — Godly.Design"
+  description="Posts.design style feed of OG images, social graphics, launch videos, and header banners."
+  jsonLd={jsonLd}
+>
+  <section class="space-y-6">
+    <div class="space-y-2">
+      <p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Posts.design Feed</p>
+      <h1 class="text-3xl font-semibold tracking-tight text-white">Marketing gallery</h1>
+      <p class="max-w-2xl text-sm text-zinc-400">
+        OpenGraph art, launch graphics, teaser clips, and email headers — curated
+        for go-to-market inspiration.
+      </p>
+    </div>
+
+    <div class="columns-1 gap-4 sm:columns-2 lg:columns-3">
+      {marketing.map((asset) => (
+        <div class="mb-4 break-inside-avoid">
+          <VideoCard
+            client:visible
+            title={asset.title}
+            subtitle={asset.assetType ?? undefined}
+            imageUrl={asset.mediaUrl}
+            posterUrl={asset.thumbnailUrl ?? asset.mediaUrl}
+            videoUrl={
+              asset.assetType === "Product Launch Video" ? asset.mediaUrl : undefined
+            }
+          />
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

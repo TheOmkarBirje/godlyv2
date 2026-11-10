@@ -1,0 +1,57 @@
+---
+import "../styles/globals.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  title = "Godly.Design",
+  description = "Elite visual inspiration and monetized component registry for AI-native product teams.",
+  jsonLd,
+} = Astro.props;
+
+const jsonLdBlocks = jsonLd
+  ? Array.isArray(jsonLd)
+    ? jsonLd
+    : [jsonLd]
+  : [];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {
+      jsonLdBlocks.map((block) => (
+        <script type="application/ld+json" set:html={JSON.stringify(block)} />
+      ))
+    }
+  </head>
+  <body>
+    <header class="border-b border-white/10 bg-zinc-950/80 backdrop-blur">
+      <nav class="godly-container flex h-16 items-center justify-between">
+        <a href="/" class="text-sm font-semibold tracking-tight text-white">
+          Godly<span class="text-zinc-400">.Design</span>
+        </a>
+        <nav class="flex items-center gap-4 text-sm text-zinc-300">
+          <a href="/" class="hover:text-white">Feed</a>
+          <a href="/marketing" class="hover:text-white">Marketing</a>
+          <a href="/components" class="hover:text-white">Components</a>
+          <a href="/llms.txt" class="hover:text-white">llms.txt</a>
+        </nav>
+      </nav>
+    </header>
+
+    <main class="godly-container py-10">
+      <slot />
+    </main>
+  </body>
+</html>

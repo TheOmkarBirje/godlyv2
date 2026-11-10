@@ -1,0 +1,49 @@
+---
+import { InspirationFeed } from "../components/FilterBar";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  getCompanies,
+  getMarketingAssets,
+  getPages,
+  getPublishedComponents,
+  getSections,
+} from "../lib/cms";
+import { buildUnifiedFeed } from "../lib/feed";
+
+const [companies, pages, sections, marketing, components] = await Promise.all([
+  getCompanies(),
+  getPages(),
+  getSections(),
+  getMarketingAssets(),
+  getPublishedComponents(),
+]);
+
+const feedItems = buildUnifiedFeed({
+  companies,
+  pages,
+  sections,
+  marketing,
+  components,
+});
+---
+
+<BaseLayout
+  title="Godly.Design — Unified Inspiration Feed"
+  description="Browse sections, brand walkthroughs, marketing art, and coded components from one masonry gallery."
+>
+  <section class="space-y-4">
+    <div class="space-y-2">
+      <p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Godly.Design</p>
+      <h1 class="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+        Unified inspiration feed
+      </h1>
+      <p class="max-w-2xl text-sm text-zinc-400">
+        High-res looping captures from the elite product web — zero source code on
+        the public surface. Copy opaque MCP prompts when you are ready to build in
+        your IDE.
+      </p>
+    </div>
+
+    <InspirationFeed client:visible items={feedItems} />
+  </section>
+</BaseLayout>
